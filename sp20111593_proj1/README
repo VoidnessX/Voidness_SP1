@@ -1,0 +1,8 @@
+시스템 프로그래밍 프로젝트 1
+20111593 김동현
+
+1. How to compile
+ - sp20111593_proj1 디렉토리 안에서 make 명령어 실행
+
+2. How to run
+ - 배쉬 창에 ./20111593.out (input file) 입력하면 출력 결과물이 화면과 output.txt로 나온다.
