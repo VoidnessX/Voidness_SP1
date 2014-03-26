@@ -20,8 +20,10 @@ void StartSicsim()
 	while(sicsimpower){
 		command = ResetCommand(command);
 		printf("sicsim> ");
-		scanf("%s", command);
+		//gets(command);
+		fgets(command, sizeof(command), stdin);
 		CheckingCommand(command);
+		fflush(stdin);
 	}
 }
 
@@ -42,25 +44,48 @@ char* ResetCommand(char *command)
 }
 
 //TODO - Need to comment
-void CheckingCommand(char *command)
+int CheckingCommand(char *command)
 {
-	if(strcmp(command, "help") == 0 || strcmp(command, "h") == 0){
-		PrintHelp();
-		MakeHistory(command);
-	}
-	else if(strcmp(command, "dir") == 0 || strcmp(command, "d") == 0){
-		PrintDir();
-		MakeHistory(command);
-	}
-	else if(strcmp(command, "quit") == 0 || strcmp(command, "q") == 0)
-		sicsimpower = false;
-	else if(strcmp(command, "history") == 0 || strcmp(command, "hi") == 0){
-		PrintHistory();
-		MakeHistory(command);
-	}
+	char *token_command1 = NULL, *token_command2 = NULL, *token_command3 = NULL, *token_command4 = NULL;
+	char separator[] = " ,\t\n";
+	
+	token_command1 = strtok(command, separator);
+	if(token_command1 != NULL)
+		token_command2 = strtok(NULL, separator);
+	if(token_command2 != NULL)
+		token_command3 = strtok(NULL, separator);
+	if(token_command3 != NULL)
+		token_command4 = strtok(NULL, separator);
 
+	if((strcmp(token_command1, "help") == 0 || strcmp(token_command1, "h") == 0) && (token_command2 == NULL)){
+		PrintHelp();
+		MakeHistory(token_command1);
+	}
+	else if((strcmp(token_command1, "dir") == 0 || strcmp(token_command1, "d") == 0) && (token_command2 == NULL)){
+		PrintDir();
+		MakeHistory(token_command1);
+	}
+	else if((strcmp(token_command1, "quit") == 0 || strcmp(token_command1, "q") == 0) && (token_command2 == NULL))
+		sicsimpower = false;
+	else if((strcmp(token_command1, "history") == 0 || strcmp(token_command1, "hi") == 0) && (token_command2 == NULL)){
+		PrintHistory();
+		MakeHistory(token_command1);
+	}
+	else if((strcmp(token_command1, "dump") == 0 || strcmp(token_command1, "du") == 0) && (strcmp(token_command2, "start"))){
+		m = 0;
+		n = 0;
+		PrintDump();
+		MakeHistory(command);
+	}
 	else
 		printf("Wrong command\n");
+
+	
+	printf("%s\n", token_command1);
+	printf("%s\n", token_command2);
+	printf("%s\n\n\n", command);
+	
+	return 0;
 }
 
 /* Function name : PrintHelp()
@@ -154,6 +179,84 @@ int PrintHistory()
 	return 0;
 }
 
+//TODO - MAKE FUNCTION IN THIS AREA
+
+/* Function name : PrintDump()
+ *
+ */
+int PrintDump()
+{
+	int cnt = 0, firstn = n;
+
+	for( ; ; m++){
+		// print memory address
+		printf("%05lx  ", &VMemory[m][0]-&VMemory[0][0]);
+
+		// print data of memory
+		for( ; ; n++){
+			if(n == 15){
+				printf("%02x ", VMemory[m][n]);
+				n = 0;
+				cnt++;
+				break;
+			}
+			else{
+				printf("%02x ", VMemory[m][n]);
+				cnt++;
+			}
+
+			if(cnt == 160)
+				break;
+		}
+
+		// print ASCII code
+		printf("; ");
+		for( ; ; firstn++){
+			if(firstn == 15){
+				PrintChar(VMemory[m][firstn]);
+				printf("\n");
+				firstn = 0;
+				break;
+			}
+			else{
+				PrintChar(VMemory[m][firstn]);
+			}
+		}
+
+		if(cnt == 160)
+			break;
+	}
+
+	SetMemoryAddress();
+
+	return 0;
+}
+
+void PrintChar(unsigned char c)
+{
+	if(isprint(c))
+		printf("%c", c);
+	else
+		printf(".");
+}
+
+void SetMemoryAddress()
+{
+	if(n == 15){
+		n = 0;
+		m = m+1;
+	}
+	else
+		n = n+1;
+}
+
+
+
+
+
+
+
+// END OF PROGRAM
 //TODO - Maybe need more free function
 int FreeAllMemory()
 {
